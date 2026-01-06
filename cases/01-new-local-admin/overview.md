@@ -1,40 +1,52 @@
 # Case 01 — New Local Admin
 
+## Case summary
+- **Severity (initial):** Medium  
+- **Confidence (initial):** Medium  
+- **Status:** Open (until validated)  
+- **Primary signals:** Windows Security log (Event ID 4720, Event ID 4732)  
+- **Primary risk:** Unauthorized privilege assignment / local escalation  
+- **MITRE ATT&CK (light):** Privilege Escalation / Account Manipulation
+
 ## Goal
 Detect and triage:
 1) creation of a new local user  
-2) addition to a privileged group (e.g., Administrators)
+2) addition to a privileged group (e.g., Administrators)  
 
 SOC output: evidence, limits, decision, remediation, and post-action verification.
 
 ## Scenario (lab)
-A local account is created and its group membership is modified to a privileged group.  
-The key principle is **not to assume intent**. The activity is treated as potential escalation until validated.
+We observe the creation of a local account and a membership change toward a privileged group.  
+The focus is: **do not assume intent**. Treat it as potential escalation until validated.
 
 ## Data sources
 - Windows **Security** log
-- Live system state (local users and groups)
+- Actual system state (local users and local group membership)
 
 ## Signal
-- Security **EventID 4720**: user account created
-- Security **EventID 4732**: member added to a security-enabled local group
+- Security **Event ID 4720**: user account created
+- Security **Event ID 4732**: member added to a security-enabled local group
 
 ## What I can prove
-- The account was created
-- Privileged group membership was modified
-- The current system state confirms or disproves the log evidence
+- That the account was created (log evidence)
+- That membership was modified toward a privileged group (log evidence)
+- Whether the current state (users/groups) confirms or contradicts the event logs (live validation)
 
 ## What I cannot prove (from logs alone)
-- Intent (mistake, authorized admin activity, or abuse)
-- Change approval or business context without external sources (ticket, request, owner)
+- Intent (mistake, authorized activity, abuse)
+- Change/approval context without external sources (ticket, request, owner)
 
-## Triage outcome
-Handled as **potential privilege escalation** until validation:
-- who requested the change
+## Triage outcome (default)
+Handle as **potential privilege escalation** until validated:
+- who requested it
 - why it was needed
-- maintenance window
-- affected asset and impact
+- whether it happened in an approved change window
+- asset criticality and business impact
 
-## Remediation (lab)
-- Containment and cleanup: privilege removal and post-action verification
-- Documentation of decision and evidence
+## Remediation (lab, high level)
+- Containment: remove privileged membership and/or disable the account
+- Cleanup (if required): delete the account
+- Verification: confirm “before/after” state
+- Documentation: capture evidence and decision rationale
+
+> This case demonstrates how a SOC handles identity/privilege signals without over-attributing blame.
